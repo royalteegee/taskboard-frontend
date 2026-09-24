@@ -10,9 +10,12 @@ jobs:
     steps:
       - name: clone the repo
         uses: actions/checkout@v4
+
       - name: build the docker image
-        run: docker build -t "${{ secrets.DOCKERHUB_USERNAME}}/frontend-app:latest"
+        run: docker build -t "${{ secrets.DOCKERHUB_USERNAME}}/frontend-app:latest" .
+
       - name: login to dockerhub
         run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+        
       - name: push to dockerhub
         run: docker push "${{ secrets.DOCKERHUB_USERNAME }}/frontend-app:latest"
