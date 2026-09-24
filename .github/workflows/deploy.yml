@@ -20,4 +20,4 @@ jobs:
         run: docker build -t "${{ secrets.DOCKERHUB_USERNAME }}/taskboard-frontend:latest" .
 
       - name: Push the image
-        run: docker push "${{ secrets.DOCKERHUB_USERNAME }}/myapp:latest"
+        run: docker push "${{ secrets.DOCKERHUB_USERNAME }}/taskboard-frontend:latest"
