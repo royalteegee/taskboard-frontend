@@ -16,6 +16,31 @@ jobs:
 
       - name: login to dockerhub
         run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
-        
+
       - name: push to dockerhub
         run: docker push "${{ secrets.DOCKERHUB_USERNAME }}/frontend-app:latest"
+  
+  pull-and-run-docker-image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/ec2.pem
+          chmod 600 ~/.ssh/ec2.pem
+          ssh-keyscan -H "${{ secrets.EC2_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Pull the image and run it as container on EC2
+        run: |
+          ssh -i ~/.ssh/ec2.pem "${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}" << 'EOF'
+            docker pull ${{ secrets.DOCKERHUB_USERNAME }}/taskboard-frontend:latest
+            docker stop taskboard-frontend || true
+            docker rm taskboard-frontend || true
+            docker run -d \
+              --name taskboard-frontend \
+              --restart unless-stopped \
+              --env-file /home/ubuntu/taskboard-frontend/.env \
+              -p 8080:4000 \
+              ${{ secrets.DOCKERHUB_USERNAME }}/taskboard-frontend:latest
+            docker image prune -f
+          EOF
