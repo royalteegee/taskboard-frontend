@@ -47,7 +47,3 @@ jobs:
               ${{ secrets.DOCKERHUB_USERNAME }}/taskboard-frontend:latest
             docker image prune -f
           EOF
-
-      - name: Remove SSH key
-        if: always()
-        run: rm -f ~/.ssh/ec2.pem
